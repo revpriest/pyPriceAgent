@@ -38,7 +38,7 @@
 #
 # You should set a cron to run it some time after market close:
 # Something like this probably:
-# 00 21 * * * python -u /home/user/py/pyPriceAgent/pyPriceAgent.py --email true -l2 >> /home/pre/log/stocks.log  2>&1
+# 00 21 * * * python -u /home/user/py/pyPriceAgent/pyPriceAgent.py --email true -l2 >> /home/user/log/stocks.log  2>&1
 #
 # Files
 # -----

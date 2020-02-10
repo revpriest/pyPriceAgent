@@ -315,6 +315,9 @@ emasort   Bear         0 / 19   0 / 19   1 / 19    1 / 19    2 / 19    3 / 19
 Limit or expand checks
 -----------------------
 
+We can limit which tests we decide to run,
+or include some of those not run by default.
+
 Imagine we wanted to know how long it takes
 Tesco's price to go up by 20% after a
 bullish weekly RSI signal in the last 2000
@@ -356,3 +359,62 @@ rsi_w     Bull         0 / 45   2 / 45   9 / 45    10 / 45   10 / 45   10 / 45
 rsi_w     Bear         0 / 35   0 / 35   1 / 35    4 / 35    10 / 35   10 / 35
 
 ```
+
+
+Multi-checks
+------------
+We can example what happened if more than one check triggered
+on the same day if limit our checks to those we care about
+and enable the multi-check check.
+
+If there was a sequential nine on both the daily and
+the weekly candles at once, what happened to the price?
+
+```
+ ./pyPriceAgent.py -t TSCO -b 2000 -c seq,seq_w,multi
+```
+
+Well, with Tesco it's only happened three times. The two
+times it was a bullish signal, it went up an average of 0.5%
+the next day. When it was a bearish signal it fell 1.3% the
+next day.
+
+```
+From: example@gmail.com
+To: example@your.email.moo
+Subject: Daily Stock Summary
+
+2020-02-10
+
+Nice looking things this time:
+2:	TSCO.L	1067 days ago: SEQ Red 9 d, SEQ Red 9 w
+
+
+And some things looking bad:
+-2:	TSCO.L	201 days ago: SEQ Green 9 d, SEQ Green 9 w
+
+
+Average Gain After Signal:
+Signal    Direction    1 Bar        5 Bar        10 Bar       15 Bar       20 Bar       25 Bar
+--------  -----------  -----------  -----------  -----------  -----------  -----------  -----------
+seq_w     Bull         -0.4 % / 35  -1.6 % / 35  -3.7 % / 35  -6.3 % / 35  -8.1 % / 35  -8.6 % / 35
+multi     Bull         +0.5 % / 2   -0.5 % / 2   -2.5 % / 2   -7.7 % / 2   -9.9 % / 2   -10.1 % / 2
+seq       Bull         +0.1 % / 33  +0.4 % / 33  +1.0 % / 33  -0.3 % / 33  -0.0 % / 32  +0.1 % / 32
+seq_w     Bear         +0.5 % / 40  +2.6 % / 40  +3.3 % / 40  +5.6 % / 40  +6.6 % / 40  +7.7 % / 40
+multi     Bear         -1.3 % / 1   -0.3 % / 1   -4.4 % / 1   -4.7 % / 1   -8.7 % / 1   -10.0 % / 1
+seq       Bear         -0.0 % / 27  +0.3 % / 27  +0.9 % / 27  +1.4 % / 27  +0.8 % / 27  +0.2 % / 27
+
+Number that Hit +/-10.0% gain/loss in bull/bear by:
+Signal    Direction    1 Bar    5 Bar    10 Bar    15 Bar    20 Bar    25 Bar
+--------  -----------  -------  -------  --------  --------  --------  --------
+seq_w     Bull         0 / 35   0 / 35   0 / 35    0 / 35    0 / 35    0 / 35
+multi     Bull         0 / 2    0 / 2    0 / 2     0 / 2     0 / 2     0 / 2
+seq       Bull         0 / 33   1 / 33   3 / 33    4 / 33    5 / 32    8 / 32
+seq_w     Bear         0 / 40   0 / 40   0 / 40    0 / 40    0 / 40    2 / 40
+multi     Bear         0 / 1    0 / 1    0 / 1     0 / 1     0 / 1     1 / 1
+seq       Bear         0 / 27   0 / 27   0 / 27    1 / 27    2 / 27    3 / 27
+```
+
+
+
+

@@ -46,19 +46,31 @@ Something like this probably:
 
 Files
 =====
-The "tickers.txt" file lists the stocks, one per line, trading-view full-names.
+The "tickers.txt" file lists the stocks, one per line, in a format 
+like you'll get exporting a trading view list. EG: NYSE:IBM
+
 The "bets.json" file is created to track any reminder bets you place.
+
 The "caches" directory holds API request-results etc.
+
 The "history" directory holds our daily price-history for each stock
+
 Both dirs must be writeable, all the data is just JSON dumped into files.
 
+Ticker Parameters
+-----------------
 You may adjust the default four MA/EMA values in the tickers.txt
 file, with 4 or 8 numbers separated by spaces after the
 ticker name. First the EMAs short to long, then the MAs short to long.
 
+EG:
+nasdaq:amzn 25 60 95 180 25 60 95 180
+
+Safe-write by renaming
+----------------------
 By default we write files to ".new" and then rename them to
-overwrite the old version. This may not work on Windows, I'm
-told. You can override the behaviour with secrets.py 
+overwrite the old version. I'm told this may not work on 
+Windows. You can override the behaviour with secrets.py 
 
 You'll  want to create a secrets.py file to contain API keys
 and SMTP email details etc.
@@ -67,11 +79,11 @@ Run --help to see the CLI params,
 
 Bets 
 =====
-You can add one at the CLI:
+You can add a new bet at the CLI:
 ```
 stock.alert.py -t LSE:TUI -B Price/target/stop/days/confidence/startDate
 ```
-Defaults exist for them all:
+Defaults exist for them all, type "X" to get:
 ```
   Price -> Previous Day's Close
   Target -> +15% on price
@@ -85,15 +97,18 @@ You'll have to just edit the JSON in bets.json if you screw up.
 There's more planned here that I haven't gotten to yet. 
 
 Confidence is more or less ignored, but I'm sticking to <50 for bets I
-don't take and >50 for bets I do actually put money on for now.
+don't take and >50 for bets I do actually put money on for now. I'd
+suggest you do similar.
 
-See copious comments in the source-code for more about how
-it works and what the various options are.
+There is copious comments in the source-code for more about how
+it works and what the various options are. It's really readable.
 
 
 EXAMPLES
 ========
 
+Daily Report
+-------------
 Just fetch today's prices and print the email alert:
 ```
 ./pyPriceAgent.py 
@@ -117,7 +132,58 @@ And some things looking bad:
 
 ```
 
+Course, if printing the email content isn't good
+enough and you want to actually SEND it, then
+hopefully your SMTP details are in secrets.py
+then:
 
+```
+./pyPriceAgent.py  --email  true
+```
+
+And it'll send it. The output to the console
+will just look the same though, but an email
+should arrive in your inbox too.
+
+
+
+Filter Tickers
+------------------
+Your ticker-list will likely grow bigger than this example,
+and sometimes you might only care about one ticker. Especially
+when back-testing later. 
+
+We can filter to show only some or one ticker. 
+
+```
+./pyPriceAgent.py -t BTCUSD
+```
+
+Limited to only BTCUSD we only see things about BTCUSD
+
+```
+From: example@gmail.com
+To: example@your.email.moo
+Subject: Daily Stock Summary
+
+2020-02-10
+
+Nice looking things this time:
+
+
+And some things looking bad:
+-1:	BTCUSD.BINANCE	RSI Daily falling
+./pyPriceAgent.py -t TSCO 
+```
+
+Or if we wanted to see everything about BTC we
+could just include that, or just "LSE" to
+see only London exchange stocks etc.
+
+
+
+Basic Backtest
+---------------
 What about in the last week? Use -b or --backtest
 
 ```
@@ -148,6 +214,9 @@ And some things looking bad:
 -1:	BTCUSD.BINANCE	RSI Daily falling
 -1:	IBM.N	1 days ago: RSI Daily falling
 ```
+
+Back-testing With Results
+------------------------
 
 If we back-test even further then we start to
 get to triggered that happened far enough ago
@@ -242,19 +311,23 @@ emasort   Bear         0 / 19   0 / 19   1 / 19    1 / 19    2 / 19    3 / 19
 
 ```
 
-Your ticker-list will likely grow bigger than this example
-one, and perhaps be slow to update or give more information
-than you want or can handle. We can filter to show only
-some or one ticker. 
+
+Limit or expand checks
+-----------------------
+
+Imagine we wanted to know how long it takes
+Tesco's price to go up by 20% after a
+bullish weekly RSI signal in the last 2000
+days.
 
 ```
-./pyPriceAgent.py -t TSCO -b 1000
+./pyPriceAgent.py -t TSCO -b 2000 -c rsi_w -p 5
 ```
 
-Now limiting only to Tesco, we know that over the nine times 
-an RSI bull signal happened, the price rose by an average
-of 0.7% the next day, but was down an average of 0.7% five 
-days later. 
+The output tells us that 2/45 times Tesco went
+upby 5% within 5 days, and 10/45 times it was
+up that high within 25 days.
+
 ```
 From: example@gmail.com
 To: example@your.email.moo
@@ -263,49 +336,23 @@ Subject: Daily Stock Summary
 2020-02-10
 
 Nice looking things this time:
-2:	TSCO.L	358 days ago: RSI Daily up, SEQ Red 9 d
+1:	TSCO.L	281 days ago: RSI Weekly up
 
 
 And some things looking bad:
--2:	TSCO.L	201 days ago: SEQ Green 9 d, SEQ Green 9 w
+-1:	TSCO.L	196 days ago: RSI Weekly falling
 
 
 Average Gain After Signal:
 Signal    Direction    1 Bar        5 Bar        10 Bar       15 Bar       20 Bar       25 Bar
 --------  -----------  -----------  -----------  -----------  -----------  -----------  -----------
-seq_w     Bull         -0.6 % / 15  -3.7 % / 15  -7.4 % / 15  -8.5 % / 15  -7.5 % / 15  -6.6 % / 15
-rsi       Bull         +0.7 % / 9   -0.7 % / 9   +0.1 % / 9   -1.1 % / 9   -3.0 % / 9   -1.6 % / 9
-seq       Bull         +0.8 % / 11  +1.2 % / 11  +2.5 % / 11  +2.0 % / 11  +2.0 % / 10  +2.4 % / 10
-multi     Bull         -1.5 % / 1   -2.2 % / 1   -0.4 % / 1   -1.5 % / 1   -12.6 % / 1  -10.1 % / 1
-emax14    Bull         -0.4 % / 6   +0.5 % / 6   +2.5 % / 6   +3.6 % / 6   +4.8 % / 6   +4.1 % / 6
-rsi_w     Bull         -0.2 % / 10  +0.8 % / 10  +5.2 % / 10  +6.1 % / 10  +6.0 % / 10  +7.1 % / 10
-emasort   Bull         +0.8 % / 7   +2.2 % / 7   +1.8 % / 7   +1.9 % / 7   +3.2 % / 7   +3.1 % / 7
-seq_w     Bear         +0.4 % / 20  +1.7 % / 20  +2.0 % / 20  +5.6 % / 20  +5.0 % / 20  +5.9 % / 20
-rsi       Bear         +0.2 % / 20  +0.6 % / 20  +1.5 % / 20  +0.7 % / 20  +1.0 % / 20  +0.9 % / 20
-seq       Bear         -0.0 % / 12  +0.5 % / 12  +1.1 % / 12  +1.3 % / 12  +0.8 % / 12  +0.5 % / 12
-multi     Bear         +0.3 % / 4   -1.0 % / 4   -2.0 % / 4   -1.7 % / 4   -3.5 % / 4   -5.1 % / 4
-emax14    Bear         +0.2 % / 5   -1.5 % / 5   -0.9 % / 5   -0.7 % / 5   +2.5 % / 5   +1.9 % / 5
-rsi_w     Bear         +0.7 % / 24  +2.6 % / 24  +1.4 % / 24  +2.1 % / 24  +1.6 % / 24  -0.4 % / 24
-emasort   Bear         -0.1 % / 6   +2.9 % / 6   +1.6 % / 6   +3.1 % / 6   +3.0 % / 6   +2.6 % / 6
+rsi_w     Bull         -0.8 % / 45  -2.6 % / 45  -2.0 % / 45  -1.1 % / 45  -2.9 % / 45  -5.1 % / 45
+rsi_w     Bear         +0.6 % / 35  +1.9 % / 35  +0.8 % / 35  +2.1 % / 35  +1.8 % / 35  +0.7 % / 35
 
-Number that Hit +/-10.0% gain/loss in bull/bear by:
+Number that Hit +/-5.0% gain/loss in bull/bear by:
 Signal    Direction    1 Bar    5 Bar    10 Bar    15 Bar    20 Bar    25 Bar
 --------  -----------  -------  -------  --------  --------  --------  --------
-seq_w     Bull         0 / 15   0 / 15   0 / 15    0 / 15    0 / 15    0 / 15
-rsi       Bull         0 / 9    0 / 9    0 / 9     0 / 9     1 / 9     1 / 9
-seq       Bull         0 / 11   1 / 11   2 / 11    2 / 11    3 / 10    4 / 10
-multi     Bull         0 / 1    0 / 1    0 / 1     0 / 1     0 / 1     0 / 1
-emax14    Bull         0 / 6    0 / 6    1 / 6     1 / 6     1 / 6     1 / 6
-rsi_w     Bull         0 / 10   0 / 10   3 / 10    5 / 10    5 / 10    5 / 10
-emasort   Bull         0 / 7    1 / 7    1 / 7     1 / 7     1 / 7     1 / 7
-seq_w     Bear         0 / 20   0 / 20   0 / 20    0 / 20    0 / 20    2 / 20
-rsi       Bear         0 / 20   0 / 20   0 / 20    0 / 20    0 / 20    1 / 20
-seq       Bear         0 / 12   0 / 12   0 / 12    0 / 12    0 / 12    1 / 12
-multi     Bear         0 / 4    0 / 4    0 / 4     0 / 4     0 / 4     1 / 4
-emax14    Bear         0 / 5    0 / 5    1 / 5     1 / 5     1 / 5     1 / 5
-rsi_w     Bear         0 / 24   0 / 24   0 / 24    0 / 24    0 / 24    1 / 24
-emasort   Bear         0 / 6    0 / 6    0 / 6     0 / 6     0 / 6     1 / 6
+rsi_w     Bull         0 / 45   2 / 45   9 / 45    10 / 45   10 / 45   10 / 45
+rsi_w     Bear         0 / 35   0 / 35   1 / 35    4 / 35    10 / 35   10 / 35
+
 ```
-
-
-

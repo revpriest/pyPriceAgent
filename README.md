@@ -82,8 +82,41 @@ Defaults exist for them all:
 ```
 
 You'll have to just edit the JSON in bets.json if you screw up.
+There's more planned here that I haven't gotten to yet. 
 
-There's more in ./pyPriceAgent --help
+Confidence is more or less ignored, but I'm sticking to <50 for bets I
+don't take and >50 for bets I do actually put money on for now.
 
-See copious comments in the source-code for more.
+See copious comments in the source-code for more about how
+it works and what the various options are.
+
+
+EXAMPLES
+========
+
+Just fetch today's prices and print the email alert:
+```
+./pyPriceAgent.py 
+```
+The output shows the email it'd send. IN this case
+no bullish alerts, but two worrisome RSI daily
+indicators on Bitcoin.
+```
+From: example@gmail.com
+To: example@your.email.moo
+Subject: Daily Stock Summary
+
+2020-02-10
+
+Nice looking things this time:
+
+
+And some things looking bad:
+-1:	BTCEUR.COINBASE	RSI Daily falling
+-1:	BTCUSD.BINANCE	RSI Daily falling
+
+```
+
+
+
 

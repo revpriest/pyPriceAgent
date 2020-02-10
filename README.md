@@ -68,14 +68,18 @@ Run --help to see the CLI params,
 Bets 
 =====
 You can add one at the CLI:
+```
 stock.alert.py -t LSE:TUI -B Price/target/stop/days/confidence/startDate
+```
 Defaults exist for them all:
+```
   Price -> Previous Day's Close
   Target -> +15% on price
   Stop -> -5% of price (or +5% if target<price)
   Days -> 20
   Confidence -> 33
   StartDate->Today
+```
 
 You'll have to just edit the JSON in bets.json if you screw up.
 

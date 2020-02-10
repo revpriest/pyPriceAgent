@@ -1,0 +1,6 @@
+secrets.py
+bets.json
+caches/*
+history/*
+*.pyc
+myTickers.txt

@@ -23,9 +23,12 @@ stocks you'll hit their limits.
 BUILD:
 ======
 It'll need these modules.
+
+```
 sudo pip install tabulate                 #Display results in tables
 sudo pip install pandas numpy             #moving averages, maths on series.
 sudo apt-get install python-matplotlib    #plotting graphs
+```
 
 
 CONFIG:

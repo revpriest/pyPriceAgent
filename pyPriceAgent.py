@@ -973,7 +973,7 @@ def runChecks(tickers):
   for ticker in tickers:
     ema1 = 20
     ema2 = 50
-    ema3 = 128
+    ema3 = 100
     ema4 = 200
     ma1 = 25
     ma2 = 50

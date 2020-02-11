@@ -377,7 +377,7 @@ the weekly candles at once, what happened to the price?
 Well, with Tesco it's only happened three times. The two
 times it was a bullish signal, it went up an average of 0.5%
 the next day. When it was a bearish signal it fell 1.3% the
-next day.
+next day, and was down 8.7% after 20 days.
 
 ```
 From: example@gmail.com
@@ -415,6 +415,130 @@ multi     Bear         0 / 1    0 / 1    0 / 1     0 / 1     0 / 1     1 / 1
 seq       Bear         0 / 27   0 / 27   0 / 27    1 / 27    2 / 27    3 / 27
 ```
 
+Control Checks
+----------------
 
+Of course, in the last example a bearish signal warning
+of an 8% drop sounds impressive, until you notice that
+the bullish signal leads to an even bigger loss and on
+more data-points.
+
+We can add a control check, which just fires randomly, to give
+a sort of background-level of price-changes to compare against.
+
+```
+./pyPriceAgent.py -b 2000 -c seq,seq_w,multi,ctrl 
+```
+
+Across this tiny data-set, a simultaneous weekly and a daily 
+sequential-9 bull signal led to loss of 3.9% after fifteen
+days, with four data points.
+
+The equivalent bear signal led to a 0.4% less.
+
+Just randomly picking a time led to a 4.3% gain
+on a bearish signal and a 2.6% gain on a bullish
+signal.
+
+What are we to make of this?
+
+Probably that the data-set is too small to mean
+anything, there's eight data-points and six
+control points. 
+
+```
+From: example@gmail.com
+To: example@your.email.moo
+Subject: Daily Stock Summary
+
+2020-02-10
+
+Nice looking things this time:
+2:	TSCO.L	1067 days ago: SEQ Red 9 d, SEQ Red 9 w
+2:	DBCBTC.HUOBI	46 days ago: SEQ Red 9 d, SEQ Red 9 w
+1:	BTCUSD.BINANCE	55 days ago: SEQ Red 9 d
+1:	DGBBTC.BITFINEX	40 days ago: SEQ Red 9 d
+1:	LBCBTC.BITTREX	1996 days ago: Random Bull
+1:	AMZN.O	55 days ago: SEQ Red 9 d
+1:	BTCEUR.COINBASE	1951 days ago: Random Bull
+1:	IBM.N	126 days ago: SEQ Red 9 d
+
+
+And some things looking bad:
+-1:	BTCUSD.BINANCE	186 days ago: SEQ Green 9 d
+-1:	DGBBTC.BITFINEX	1981 days ago: Random Bear
+-1:	LBCBTC.BITTREX	1970 days ago: Random Bear
+-1:	DBCBTC.HUOBI	1972 days ago: Random Bear
+-1:	BTCEUR.COINBASE	1800 days ago: Random Bear
+-1:	IBM.N	104 days ago: SEQ Green 9 d
+-2:	TSCO.L	201 days ago: SEQ Green 9 d, SEQ Green 9 w
+-2:	AMZN.O	770 days ago: SEQ Green 9 d, SEQ Green 9 w
+
+
+Average Gain After Signal:
+Signal    Direction    1 Bar         5 Bar         10 Bar        15 Bar        20 Bar        25 Bar
+--------  -----------  ------------  ------------  ------------  ------------  ------------  ------------
+seq_w     Bull         -0.2 % / 99   -1.4 % / 99   -2.7 % / 99   -3.5 % / 99   -5.1 % / 99   -6.3 % / 99
+multi     Bull         +0.2 % / 4    -0.3 % / 4    -1.3 % / 4    -3.9 % / 4    -5.0 % / 4    -5.1 % / 4
+seq       Bull         +0.1 % / 108  +0.2 % / 108  +0.7 % / 108  +0.1 % / 107  +0.1 % / 105  +0.3 % / 105
+ctrl      Bull         +2.0 % / 3    -0.8 % / 3    +3.3 % / 3    +2.6 % / 3    +1.8 % / 3    +0.9 % / 3
+seq_w     Bear         +0.4 % / 154  +1.7 % / 154  +4.2 % / 154  +5.7 % / 154  +6.7 % / 154  +8.7 % / 154
+multi     Bear         +0.1 % / 4    +0.2 % / 4    -0.9 % / 4    -0.4 % / 4    +1.2 % / 4    +2.3 % / 4
+seq       Bear         -0.0 % / 112  +0.4 % / 112  +0.8 % / 112  +1.0 % / 112  +1.4 % / 112  +0.9 % / 111
+ctrl      Bear         +1.0 % / 3    +5.8 % / 3    +4.6 % / 3    +4.3 % / 3    +3.6 % / 3    +4.0 % / 3
+
+Number that Hit +/-10.0% gain/loss in bull/bear by:
+Signal    Direction    1 Bar    5 Bar    10 Bar    15 Bar    20 Bar    25 Bar
+--------  -----------  -------  -------  --------  --------  --------  --------
+seq_w     Bull         0 / 99   0 / 99   0 / 99    0 / 99    0 / 99    0 / 99
+multi     Bull         0 / 4    0 / 4    0 / 4     0 / 4     0 / 4     0 / 4
+seq       Bull         0 / 108  4 / 108  8 / 108   11 / 107  12 / 105  17 / 105
+ctrl      Bull         0 / 3    0 / 3    0 / 3     0 / 3     0 / 3     1 / 3
+seq_w     Bear         0 / 154  0 / 154  0 / 154   0 / 154   0 / 154   2 / 154
+multi     Bear         0 / 4    0 / 4    0 / 4     0 / 4     0 / 4     1 / 4
+seq       Bear         0 / 112  2 / 112  3 / 112   8 / 112   15 / 112  17 / 111
+ctrl      Bear         0 / 3    0 / 3    0 / 3     0 / 3     0 / 3     0 / 3
+
+```
+
+
+Reminder Bets
+--------------
+
+Often you may see a signal in your daily report and
+wonder how it will turn out. We can tell pyPriceAgent
+to remind us when a position we take, or are just 
+curious about but not confident enough to bet on.
+
+We saw that the RSI signalled bearish on BTCUSD,
+so we figure it's going to go down. We can place
+a bet:
+
+```
+./pyPriceAgent.py -t BTCUSD -B X/9500/5%/20/30
+```
+
+PyPriceAgent will tells us that it understood we
+wanted to bet that the price of BTCUSD would go
+from it's last close down to 9500, but that if it went up
+by five percent (to 10321.50, it calculated)
+then you'd call it a loss. 
+
+You'd also call it a day at 20 days, regardless
+of how things looked.
+
+```
+Placing Bet: 2020-02-10, BTCUSD.BINANCE
+		->From 9851.23 To 9500.00 with a stop of 10343.79 or 20 days (Conf: 30.00
+``` 
+
+When the script runs each night after close from then
+on it'll check if your bet has won or lost or timed
+out yet and add that to your daily report when it
+happens.
+
+You can use X to get a default on any field, and
+use percents or direct numbers in the ones where
+that makes sense.
 
 

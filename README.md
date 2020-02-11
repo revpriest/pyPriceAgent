@@ -64,7 +64,9 @@ file, with 4 or 8 numbers separated by spaces after the
 ticker name. First the EMAs short to long, then the MAs short to long.
 
 EG:
+```
 nasdaq:amzn 25 60 95 180 25 60 95 180
+```
 
 Safe-write by renaming
 ----------------------
@@ -72,9 +74,10 @@ By default we write files to ".new" and then rename them to
 overwrite the old version. I'm told this may not work on 
 Windows. You can override the behaviour with secrets.py 
 
-You'll  want to create a secrets.py file to contain API keys
-and SMTP email details etc.
 
+
+Help
+----
 Run --help to see the CLI params, 
 
 Bets 

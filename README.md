@@ -542,4 +542,30 @@ use percents or direct numbers in the ones where
 that makes sense.
 
 
+List Of Checks Available
+==========================
 
+```
+./pyPriceAgent.py --help
+```
+ 
+ 
+|NAME|ALERTS WHEN|
+|----|-----------|
+|bets|	alert the end/outcome of bets placed [default]|
+|ctrl|	fire randomly, as a control check |
+|emasort	|ema sort-order changes [default]|
+|emax1|	short ema crosses [default]|
+|emax2|	med ema crosses |
+|emax3|	long ema crosses |
+|emax4|	vlong ema crosses [default]|
+|masort|	ma sort-order changes |
+|max1	|short ma crosses| 
+|max2	|med ma crosses |
+|max3	|long ma crosses |
+|max4	|vlong ma crosses |
+|multi|	look for multiple other-check hits [default]|
+|rsi	|	daily RSI crosses 30/70 [default]|
+|rsi_w|weekly RSI crosses 30/70 [default]|
+|seq	| daily sequential 9 candles [default]|
+|seq_w|	weekly sequential 9 candles [default]|

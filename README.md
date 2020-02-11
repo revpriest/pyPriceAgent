@@ -176,7 +176,6 @@ Nice looking things this time:
 
 And some things looking bad:
 -1:	BTCUSD.BINANCE	RSI Daily falling
-./pyPriceAgent.py -t TSCO 
 ```
 
 Or if we wanted to see everything about BTC we

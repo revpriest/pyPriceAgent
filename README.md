@@ -234,25 +234,25 @@ So we can start to build up some statistics
 
 The output now contains tables showing the average
 gain in price of the assets after a TA event happened.
-In this case was can see that after a Bullish
-RSI Weekly event, the price was up an average of
-0.3% 1 day later, 0.4% two days later, 1.2% 10
-days later etc.
+In this case in the third line of the table we can see 
+that after a Bullish Sequential event, the price was up 
+an average of 0.3% 1 day later, 0.4% two days later, 
+1.2% 10 days later etc.
 
 Below that is a table telling us what proportion
 of the triggers were followed by a gain of 10%
 in the next 1 day / 5 days / 10 days.
 
 We can see that a bullish RSI signal was followed
-by a 10% rise within ten days 4 out of 40 times,
-and within 15 days it'd hit that 10% target six
-times.
+by a 10% rise within ten days 3 out of 40 times,
+and within 25 days it'd hit that 10% target ten
+out of 40 times.
 
 Note that the email summary output only contains
 one row for each ticker in the list. It shows the
 one in which the most triggers happened on any
-given day. TSCO had both a squention red 9 daily
-and an increasing RSI daily signal 358 days ago.
+given day. TSCO had both a sequential red 9 daily
+*and* an increasing RSI daily signal 358 days ago.
 
 ```
 From: example@gmail.com
@@ -333,7 +333,7 @@ days.
 ```
 
 The output tells us that 2/45 times Tesco went
-upby 5% within 5 days, and 10/45 times it was
+up by 5% within 5 days, and 10/45 times it was
 up that high within 25 days.
 
 ```
@@ -368,20 +368,22 @@ rsi_w     Bear         0 / 35   0 / 35   1 / 35    4 / 35    10 / 35   10 / 35
 
 Multi-checks
 ------------
-We can example what happened if more than one check triggered
-on the same day if limit our checks to those we care about
-and enable the multi-check check.
+We can examing what happened to the price once more than one 
+check triggered on the same day. We limit our checks to only
+those we care about, and enable the "multi" check.
 
-If there was a sequential nine on both the daily and
+If there was a sequential-nine on both the daily and
 the weekly candles at once, what happened to the price?
 
 ```
  ./pyPriceAgent.py -t TSCO -b 2000 -c seq,seq_w,multi
 ```
 
-Well, with Tesco it's only happened three times. The two
-times it was a bullish signal, it went up an average of 0.5%
-the next day. When it was a bearish signal it fell 1.3% the
+Well, with Tesco it's only happened three times in the
+last 2000 days. The two times it was a bullish signal, 
+it went up an average of 0.5% the next day. 
+
+When it was a bearish signal it fell 1.3% the
 next day, and was down 8.7% after 20 days.
 
 ```
@@ -512,15 +514,16 @@ Reminder Bets
 
 Often you may see a signal in your daily report and
 wonder how it will turn out. We can tell pyPriceAgent
-to remind us when a position we take, or are just 
-curious about but not confident enough to bet on.
+to remind us when there's a result on a position we 
+take, or are just curious about but not confident 
+enough to bet on.
 
 We saw that the RSI signalled bearish on BTCUSD,
 so we figure it's going to go down. We can place
 a bet:
 
 ```
-./pyPriceAgent.py -t BTCUSD -B X/9500/5%/20/30
+./pyPriceAgent.py -t BTCUSD -B X/9500/+5%/20/30
 ```
 
 PyPriceAgent will tells us that it understood we
@@ -534,7 +537,7 @@ of how things looked.
 
 ```
 Placing Bet: 2020-02-10, BTCUSD.BINANCE
-		->From 9851.23 To 9500.00 with a stop of 10343.79 or 20 days (Conf: 30.00
+		->From 9851.23 To 9500.00 with a stop of 10343.79 or 20 days (Conf: 30.00)
 ``` 
 
 When the script runs each night after close from then

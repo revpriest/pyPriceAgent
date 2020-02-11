@@ -72,7 +72,9 @@ Safe-write by renaming
 ----------------------
 By default we write files to ".new" and then rename them to
 overwrite the old version. I'm told this may not work on 
-Windows. You can override the behaviour with secrets.py 
+Windows. You can override the behaviour with secrets.py
+but if you do that don't CTRL-C as it runs or you'll keep 
+destroying your data.
 
 
 
@@ -84,7 +86,7 @@ Bets
 =====
 You can add a new bet at the CLI:
 ```
-stock.alert.py -t LSE:TUI -B Price/target/stop/days/confidence/startDate
+./pyPriceAgent.py -t LSE:TUI -B Price/target/stop/days/confidence/startDate
 ```
 Defaults exist for them all, type "X" to get:
 ```
@@ -104,7 +106,8 @@ don't take and >50 for bets I do actually put money on for now. I'd
 suggest you do similar.
 
 There is copious comments in the source-code for more about how
-it works and what the various options are. It's really readable.
+it works and what the various options are. Skimming the comments
+may well answer many questions.
 
 
 EXAMPLES
@@ -221,7 +224,7 @@ Back-testing With Results
 ------------------------
 
 If we back-test even further then we start to
-get to triggered that happened far enough ago
+get to triggers that happened long enough ago
 that we know what the price did after that trigger.
 So we can start to build up some statistics 
 

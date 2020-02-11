@@ -3,7 +3,7 @@
 ##############################################################
 #
 # PyPriceAgent keeps track of a history of stock and crypto
-# prices and sends you alerts when various Technical Analysis
+# prices and sends you apy lerts when various Technical Analysis
 # type events happen on the charts. 
 #
 # It keeps a csv and html-table file with latest prices
@@ -64,7 +64,7 @@
 # Bets!
 # -----
 # You can add one at the CLI:
-# stock.alert.py -t LSE:TUI -B Price/target/stop/days/confidence/startDate
+# pyPriceAgnet.py -t LSE:TSCO -B Price/target/stop/days/confidence/startDate
 # Defaults exist for them all:
 #   Price -> Previous Day's Close
 #   Target -> +15% on price

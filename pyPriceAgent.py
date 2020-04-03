@@ -21,6 +21,10 @@
 # to minimize calls by caching vigorously, but if you add too many 
 # stocks you'll hit their limits.
 #
+# TODO:
+# Ah bollocks: WorldTradiingData is closing down May 9th. Just over
+# a month. Will need to find an alternative.
+#
 # BUILD:
 # ------
 # It'll need these modules.

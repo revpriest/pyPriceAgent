@@ -813,15 +813,18 @@ def getSeries(prices,ohlc="c"):
     p = float(prices[day][ohlc])
     dseries.append(p)
 
-    d = dateutil.parser.isoparse(day)
-    newDay = d.weekday()
-    if(newDay < lastDay):
-      #start of new week, so add the last week to the weekly series
-      addedWeek=True
-      wseries.append(lastp)
-      if(weekLen<lastDay):
-        weekLen = lastDay+1
-    lastDay = newDay
+    #If a stock ceases trading, then get get N/A as 
+    #a date
+    if(day!="N/A"):
+      d = dateutil.parser.isoparse(day)
+      newDay = d.weekday()
+      if(newDay < lastDay):
+        #start of new week, so add the last week to the weekly series
+        addedWeek=True
+        wseries.append(lastp)
+        if(weekLen<lastDay):
+          weekLen = lastDay+1
+      lastDay = newDay
 
   if(not addedWeek):
     wseries.append(lastp)

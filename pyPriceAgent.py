@@ -16,10 +16,15 @@
 # 
 # (C) pre@dalliance.net, but I don't care, do what thou wilt.
 #
-# For stock prices, you'll need an API key from worldtradingdata.com 
-# They have daily rate limits for free accounts. The code here tries 
-# to minimize calls by caching vigorously, but if you add too many 
-# stocks you'll hit their limits.
+#
+# We use yfinance -> yahoo finance. I dunno why I didn't use
+# this in the first place. I thought it was shut down but
+# apparently it came back in 2019.
+# There's a python module
+#
+# Worldtradingdata.com closed down and all the alternatives
+# they suggested looked corporate and expensive for my
+# one-man daily use.
 #
 # TODO:
 # Ah bollocks: WorldTradiingData is closing down May 9th. Just over
@@ -97,11 +102,13 @@ from tabulate import tabulate
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as pyplot
+import yfinance as yf
 
 
 # Constants 
 MAXCACHEAGEHOURS = 23   #Age to expire cache files.
 ANALYSISPERIOD = 80     #Number of days to watch price after a check trigger
+TICKERGROUPSIZE = 5    #Number of tickers to fetch in one request
 
 # Options, mostly can be changed at the CLI or over-witten in secrets.py
 OUT_CSV_FILE = "export.csv"
@@ -196,6 +203,7 @@ except IOError:
 # Data store.
 alerts = []
 htmlCache = {}
+datCache = {}
 uniqcodes = {}
 bullishness={}
 bullishness_tops={}
@@ -321,13 +329,20 @@ def getTickerGroup(ticker,groupSize):
   """
   global unfilteredTickers
   ret=[]
-  for n in range(0,len(unfilteredTickers)):
-    testticker = unfilteredTickers[n]
+  isGrouped = ["O", "N", "L"]
+  tickersTmp = []
+  for t in unfilteredTickers:
+    for g in isGrouped:
+      if(t.endswith(g)):
+        tickersTmp.append(t)
+  
+  for n in range(0,len(tickersTmp)):
+    testticker = tickersTmp[n]
     if(testticker==ticker):
       groupNumber = n/groupSize
       index = groupNumber*groupSize
-      for i in range(index,min(len(unfilteredTickers),index+groupSize)):
-        t = unfilteredTickers[i]
+      for i in range(index,min(len(tickersTmp),index+groupSize)):
+        t = tickersTmp[i]
         t = t.replace("..",".");
         if((t.endswith(".O")) or (t.endswith(".N"))):
           t = t[0:-2]
@@ -550,8 +565,55 @@ def appendLatestPriceData(ticker,data):
     return appendLatestPriceDataCoinbase(ticker,data)
   if(ticker.endswith(".CRYPTO")):
     return appendLatestPriceDataBinance(ticker,data)
-  return appendLatestPriceDataWorldTradingData(ticker,data)
+  return appendLatestPriceDataStocks(ticker,data)
 
+
+def appendLatestPriceDataStocks(ticker,data):
+  """
+  Given our current data on the prices,
+  add the newest data we can get from
+  yfinance
+  """
+  tickerGroup = getTickerGroup(ticker,TICKERGROUPSIZE)
+  tickerGroupString = ticker
+  if(tickerGroup!=None):
+    tickerGroupString = " ".join(tickerGroup)
+
+  fetched = None
+  if(tickerGroupString in datCache):
+    fetched = datCache[tickerGroupString]
+  else:
+    fetched = yf.download(
+              tickers = tickerGroupString,
+              period =   "1mo",    # 1d,5d,1mo,3mo,6mo,1y,2y,5y,10y,ytd,max
+              interval = "1d",     # 1m,2m,5m,15m,30m,60m,90m,1h,1d,5d,1wk,1mo,3mo
+              group_by = 'column', # "column", "ticker"
+              auto_adjust = True,  # True, False. Maybe include splits etc?
+              prepost = False,     # Include after hours trading? 
+              threads = True,      # Crikey, they mean to allow a lot at once.
+              proxy = None
+            )
+    datCache[tickerGroupString] = fetched
+
+  ticker = ticker.replace("..",".");
+  if((ticker.endswith(".O")) or (ticker.endswith(".N"))):
+    ticker = ticker[0:-2]
+
+  for k in fetched["Close",ticker].keys():
+    dtkey = str(k)
+    dtkey = dtkey[0:10]
+    if(not np.isnan(fetched['Open',ticker][k])):
+      data[dtkey] = {
+       'o': fetched['Open',ticker][k],
+       'h': fetched['High',ticker][k],
+       'l': fetched['Low',ticker][k],
+       'c': fetched['Close',ticker][k],
+       'v': fetched['Volume',ticker][k]
+      }
+  return data
+  
+  
+  
 
 
 def appendLatestPriceDataWorldTradingData(ticker,data):
@@ -574,6 +636,7 @@ def appendLatestPriceDataWorldTradingData(ticker,data):
 
   page = getHtml(url)
   jsondat = json.loads(page)
+  print url;
   if("data" in jsondat):
     for dat in jsondat['data']:
       if(dat['symbol']==ticker):

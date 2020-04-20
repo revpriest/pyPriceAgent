@@ -108,7 +108,7 @@ import yfinance as yf
 # Constants 
 MAXCACHEAGEHOURS = 23   #Age to expire cache files.
 ANALYSISPERIOD = 80     #Number of days to watch price after a check trigger
-TICKERGROUPSIZE = 5    #Number of tickers to fetch in one request
+TICKERGROUPSIZE = 20    #Number of tickers to fetch in one request
 
 # Options, mostly can be changed at the CLI or over-witten in secrets.py
 OUT_CSV_FILE = "export.csv"
@@ -1053,14 +1053,14 @@ def runChecks(tickers):
     if(ticker in tickerParams):
       p = tickerParams[ticker]
       l = len(p)
-      if(l>0):ema1=int(p[0]);
-      if(l>1):ema2=int(p[1]);
-      if(l>2):ema3=int(p[2]);
-      if(l>3):ema4=int(p[3]);
-      if(l>4):ma1=int(p[4]);
-      if(l>5):ma2=int(p[5]);
-      if(l>6):ma3=int(p[6]);
-      if(l>7):ma4=int(p[7]);
+      if((l>0) and (p[0].isnumeric())):ema1=int(p[0]);
+      if((l>1) and (p[1].isnumeric())):ema2=int(p[1]);
+      if((l>2) and (p[2].isnumeric())):ema3=int(p[2]);
+      if((l>3) and (p[3].isnumeric())):ema4=int(p[3]);
+      if((l>4) and (p[4].isnumeric())):ma1=int(p[4]);
+      if((l>5) and (p[5].isnumeric())):ma2=int(p[5]);
+      if((l>6) and (p[6].isnumeric())):ma3=int(p[6]);
+      if((l>7) and (p[7].isnumeric())):ma4=int(p[7]);
 
     price = -1
     score = 0

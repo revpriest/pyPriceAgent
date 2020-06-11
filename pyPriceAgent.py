@@ -602,14 +602,17 @@ def appendLatestPriceDataStocks(ticker,data):
   for k in fetched["Close",ticker].keys():
     dtkey = str(k)
     dtkey = dtkey[0:10]
-    if(not np.isnan(fetched['Open',ticker][k])):
-      data[dtkey] = {
-       'o': fetched['Open',ticker][k],
-       'h': fetched['High',ticker][k],
-       'l': fetched['Low',ticker][k],
-       'c': fetched['Close',ticker][k],
-       'v': fetched['Volume',ticker][k]
-      }
+    try:
+      if(not np.isnan(fetched['Open',ticker][k])):
+        data[dtkey] = {
+         'o': fetched['Open',ticker][k],
+         'h': fetched['High',ticker][k],
+         'l': fetched['Low',ticker][k],
+         'c': fetched['Close',ticker][k],
+         'v': fetched['Volume',ticker][k]
+        }
+    except Exception as e:
+       print("Can't get data for "+str(k)+"/"+str(ticker));
   return data
   
   

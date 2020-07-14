@@ -837,8 +837,10 @@ def appendLatestPriceDataBinance(ticker,data):
     return data
 
   symbol = bits[0]; 
-  if(symbol.endswith("USD")):
+  if(symbol=="BTCUSD"):
     symbol+="T"
+  if(symbol=="GBPUSD"):
+    symbol ="GBPBUSD"
   url = u"https://api.binance.com/api/v1/klines?symbol="+symbol+"&interval=1d"
   page = getHtml(url)
   binanceJson = json.loads(page)

@@ -33,6 +33,9 @@
 # BUILD:
 # ------
 # It'll need these modules.
+# WARNING: IT may take a VERY long time to build Pandas.
+# Like, maybe half an hour to an hour on a Pi?
+#
 # sudo pip install tabulate                 #Display results in tables
 # sudo pip install pandas numpy             #moving averages, maths on series.
 # sudo apt-get install python-matplotlib    #plotting graphs
@@ -605,11 +608,11 @@ def appendLatestPriceDataStocks(ticker,data):
     try:
       if(not np.isnan(fetched['Open',ticker][k])):
         data[dtkey] = {
-         'o': fetched['Open',ticker][k],
-         'h': fetched['High',ticker][k],
-         'l': fetched['Low',ticker][k],
-         'c': fetched['Close',ticker][k],
-         'v': fetched['Volume',ticker][k]
+         'o': int(fetched['Open',ticker][k]),
+         'h': int(fetched['High',ticker][k]),
+         'l': int(fetched['Low',ticker][k]),
+         'c': int(fetched['Close',ticker][k]),
+         'v': int(fetched['Volume',ticker][k])
         }
     except Exception as e:
        print("Can't get data for "+str(k)+"/"+str(ticker));

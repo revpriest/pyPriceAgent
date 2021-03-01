@@ -116,8 +116,10 @@ TICKERGROUPSIZE = 20    #Number of tickers to fetch in one request
 # Options, mostly can be changed at the CLI or over-witten in secrets.py
 OUT_CSV_FILE = "export.csv"
 OUT_HTML_FILE = "export.html"
-GMAIL_USER = 'xxxxxxxxx@gmail.com'
-GMAIL_PASSWORD = 'xxxxxxxxxxxxxxxx'
+MAIL_USER = 'xxxxxxxxx@gmail.com'
+MAIL_PASSWORD = 'xxxxxxxxxxxxxxxx'
+MAIL_SMTPHOST = 'xxxxxxxxxxxxxxxx'
+MAIL_SMTPPORT = 'xxxxxxxxxxxxxxxx'
 Email_Report_Address = ['xxxa@test.net']
 API_KEY = 'demo'
 TickersName = "tickers.txt"
@@ -1694,7 +1696,7 @@ def emailAlerts():
       body+="%i:\t%s\t%s\n" % (pair[1],pair[0],bullreason_bots[pair[0]][0:120])
 
   email_text = "From: %s\nTo: %s\nSubject: %s\n\n%s" % (
-    GMAIL_USER, 
+    MAIL_USER, 
     ", ".join(Email_Report_Address), 
     "Daily Stock Summary", 
     body
@@ -1703,13 +1705,14 @@ def emailAlerts():
 
   if(Send_Email):
     try:
-        server = smtplib.SMTP_SSL('smtp.gmail.com', 465)
+        print("Sending Email To "+str(MAIL_SMTPHOST)+":"+str(MAIL_SMTPPORT)+"->"+str(MAIL_USER));
+        server = smtplib.SMTP_SSL(MAIL_SMTPHOST, MAIL_SMTPPORT)
         server.ehlo()
-        server.login(GMAIL_USER, GMAIL_PASSWORD)
-        server.sendmail(GMAIL_USER, Email_Report_Address, email_text)
+        server.login(MAIL_USER, MAIL_PASSWORD)
+        server.sendmail(MAIL_USER, "pre@dalliance.net",email_text)
         server.close()
     except:
-        print "\n\nWARNING: EMAIL FAILED!\n\n"
+        print "\n\nWARNING: EMAIL FAILED!\n\n"+str(sys.exc_info())
    
 
 
@@ -1862,6 +1865,8 @@ for opt,arg in opts:
   #Min Report Score
   elif opt in ("-B","--bet"):
     PlaceBetArgs = arg;
+
+
 
 
 #Print a header to the log.

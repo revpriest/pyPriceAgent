@@ -111,7 +111,7 @@ import yfinance as yf
 # Constants 
 MAXCACHEAGEHOURS = 23   #Age to expire cache files.
 ANALYSISPERIOD = 80     #Number of days to watch price after a check trigger
-TICKERGROUPSIZE = 20    #Number of tickers to fetch in one request
+TICKERGROUPSIZE = 5    #Number of tickers to fetch in one request
 
 # Options, mostly can be changed at the CLI or over-witten in secrets.py
 OUT_CSV_FILE = "export.csv"
@@ -585,19 +585,27 @@ def appendLatestPriceDataStocks(ticker,data):
     tickerGroupString = " ".join(tickerGroup)
 
   fetched = None
+  fetchedOkay = False;
   if(tickerGroupString in datCache):
     fetched = datCache[tickerGroupString]
   else:
-    fetched = yf.download(
-              tickers = tickerGroupString,
-              period =   "3mo",    # 1d,5d,1mo,3mo,6mo,1y,2y,5y,10y,ytd,max
-              interval = "1d",     # 1m,2m,5m,15m,30m,60m,90m,1h,1d,5d,1wk,1mo,3mo
-              group_by = 'column', # "column", "ticker"
-              auto_adjust = True,  # True, False. Maybe include splits etc?
-              prepost = False,     # Include after hours trading? 
-              threads = True,      # Crikey, they mean to allow a lot at once.
-              proxy = None
-            )
+    for i in range(0,10):
+      if(fetchedOkay==False):
+        try:
+          fetched = yf.download(
+                    tickers = tickerGroupString,
+                    period =   "3mo",    # 1d,5d,1mo,3mo,6mo,1y,2y,5y,10y,ytd,max
+                    interval = "1d",     # 1m,2m,5m,15m,30m,60m,90m,1h,1d,5d,1wk,1mo,3mo
+                    group_by = 'column', # "column", "ticker"
+                    auto_adjust = True,  # True, False. Maybe include splits etc?
+                    prepost = False,     # Include after hours trading? 
+                    threads = False,      # Crikey, they mean to allow a lot at once.
+                    proxy = None
+                  )
+          fetchedOkay=True;
+        except:
+          fetchedOkay=False
+          print("Excepted, trying again "+str(i))
     datCache[tickerGroupString] = fetched
 
   ticker = ticker.replace("..",".");

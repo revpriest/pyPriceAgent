@@ -106,6 +106,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as pyplot
 import yfinance as yf
+import traceback
 
 
 # Constants 
@@ -612,20 +613,23 @@ def appendLatestPriceDataStocks(ticker,data):
   if((ticker.endswith(".O")) or (ticker.endswith(".N"))):
     ticker = ticker[0:-2]
 
-  for k in fetched["Close",ticker].keys():
-    dtkey = str(k)
-    dtkey = dtkey[0:10]
-    try:
-      if(not np.isnan(fetched['Open',ticker][k])):
-        data[dtkey] = {
-         'o': int(fetched['Open',ticker][k]),
-         'h': int(fetched['High',ticker][k]),
-         'l': int(fetched['Low',ticker][k]),
-         'c': int(fetched['Close',ticker][k]),
-         'v': int(fetched['Volume',ticker][k])
-        }
-    except Exception as e:
-       print("Can't get data for "+str(k)+"/"+str(ticker));
+  try:
+   for k in fetched["Close",ticker].keys():
+     dtkey = str(k)
+     dtkey = dtkey[0:10]
+     try:
+       if(not np.isnan(fetched['Open',ticker][k])):
+         data[dtkey] = {
+          'o': int(fetched['Open',ticker][k]),
+          'h': int(fetched['High',ticker][k]),
+          'l': int(fetched['Low',ticker][k]),
+          'c': int(fetched['Close',ticker][k]),
+          'v': int(fetched['Volume',ticker][k])
+         }
+     except Exception as e:
+        print("Can't get data for "+str(k)+"/"+str(ticker)+" Exception"+str(e));
+  except Exception as e:
+    print("Can't get data for "+str(k)+"/"+str(ticker)+" At All Exception"+str(e));
   return data
   
   

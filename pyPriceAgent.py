@@ -454,7 +454,7 @@ def getPrices(ticker):
   date
   """
   ticker = str(ticker)
-  cacheFileName = "history/"+ticker+".json"
+  cacheFileName = "history/"+(ticker.replace("/","__"))+".json"
   data = checkForCache(cacheFileName,expire=-1);
   if(data==None):
     data = {}
@@ -478,7 +478,7 @@ def savePriceData(ticker,data):
   then do a more atomic "mv" to actually
   overwrite the old data.
   """
-  cacheFileName = "history/"+ticker+".json"
+  cacheFileName = "history/"+(ticker.replace("/","__"))+".json"
   out=json.dumps(data, indent=2, sort_keys = True )
   writeFile(cacheFileName, out)
   
@@ -557,6 +557,8 @@ def appendLatestPriceData(ticker,data):
   stock, append some new ones from the latest
   API call
   """
+  if(ticker.endswith(".DEXSCREENER")):
+    return appendLatestPriceDataDexscreener(ticker,data)
   if(ticker.endswith(".BINANCE")):
     return appendLatestPriceDataBinance(ticker,data)
   if(ticker.endswith(".BITFINEX")):
@@ -601,6 +603,9 @@ def appendLatestPriceDataStocks(ticker,data):
                     auto_adjust = True,  # True, False. Maybe include splits etc?
                     prepost = False,     # Include after hours trading? 
                     threads = False,      # Crikey, they mean to allow a lot at once.
+                    repair=True,
+                    keepna=True,
+                    rounding=True,
                     proxy = None
                   )
           fetchedOkay=True;
@@ -620,16 +625,17 @@ def appendLatestPriceDataStocks(ticker,data):
      try:
        if(not np.isnan(fetched['Open',ticker][k])):
          data[dtkey] = {
-          'o': int(fetched['Open',ticker][k]),
-          'h': int(fetched['High',ticker][k]),
-          'l': int(fetched['Low',ticker][k]),
-          'c': int(fetched['Close',ticker][k]),
-          'v': int(fetched['Volume',ticker][k])
+          'o': float(fetched['Open',ticker][k]),
+          'h': float(fetched['High',ticker][k]),
+          'l': float(fetched['Low',ticker][k]),
+          'c': float(fetched['Close',ticker][k]),
+          'v': float(fetched['Volume',ticker][k])
          }
+         print(data[dtkey]['o']);
      except Exception as e:
         print("Can't get data for "+str(k)+"/"+str(ticker)+" Exception"+str(e));
   except Exception as e:
-    print("Can't get data for "+str(k)+"/"+str(ticker)+" At All Exception"+str(e));
+    print("Can't get data for "+str(ticker)+" At All Exception"+str(e));
   return data
   
   
@@ -798,6 +804,8 @@ def appendLatestPriceDataBittrex(ticker,data):
     mkt = ticker[4:7]+"-"+ticker[0:4]
   url = "https://api.bittrex.com/api/v1.1/public/getmarketsummary?market="+mkt
   page = getHtml(url)
+  print(str(page))
+  moexit()
   jsondat = json.loads(page)
   if((jsondat['success']=="true") or (jsondat['success']==True)):
     now = date.today()
@@ -876,6 +884,41 @@ def appendLatestPriceDataBinance(ticker,data):
        'v': dat[5],
       }
   return data
+
+
+
+def appendLatestPriceDataDexscreener(ticker,data):
+  """
+  Given our current data on the prices,
+  add the newest data we can get, Dex-Screener
+  version
+  """
+  bits = ticker.split(".")
+  if(len(bits)<2):
+    return data
+
+  symbol = bits[0]; 
+  url = u"https://api.dexscreener.com/latest/dex/pairs/"+symbol
+  page = getHtml(url)
+  dexJson = json.loads(page)
+
+  if(len(dexJson)>0):
+    opn = dexJson['pairs'][0]['priceUsd']
+    vol = dexJson['pairs'][0]['volume']['h24']
+    timestamp = time.time()
+    dt = date.fromtimestamp(timestamp)
+    dtkey = dt.isoformat()
+    
+    data[dtkey] = {
+     'o': opn,
+     'h': opn,
+     'l': opn,
+     'c': opn,
+     'v': vol,
+    }
+  return data
+
+
 
 
 
@@ -1063,6 +1106,10 @@ def runChecks(tickers):
   outTable = []
   latestPrices = {}
   for ticker in tickers:
+    tickername=ticker;
+    if(ticker.endswith(".DEXSCREENER")):
+      bts = ticker.split(".")
+      tickername=bts[1]
     ema1 = 20
     ema2 = 50
     ema3 = 100
@@ -1098,7 +1145,7 @@ def runChecks(tickers):
 
     if(len(dseries)>2):
       #Set the latest price for export
-      price = latestPrices[ticker] = dseries[-1]
+      price = latestPrices[tickername] = dseries[-1]
 
       #Some indicators
       rsi  = calculateRsi(dseries,14);

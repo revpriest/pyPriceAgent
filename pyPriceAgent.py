@@ -38,7 +38,9 @@
 #
 # sudo pip install tabulate                 #Display results in tables
 # sudo pip install pandas numpy             #moving averages, maths on series.
-# sudo apt-get install python-matplotlib    #plotting graphs
+# sudo apt install python-matplotlib        #plotting graphs
+# sudo apt install libatlas-base-dev        #Numpy needs this
+# pip3 install yfinance==0.2.54             #Yfinance versions older than this don't work
 # 
 #
 # CONFIG:
@@ -104,13 +106,17 @@ import json
 from tabulate import tabulate
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as pyplot
+
+import matplotlib
+matplotlib.use('Agg')  # Set backend first
+import matplotlib.pyplot as plt
+
 import yfinance as yf
 import traceback
 
 
 # Constants 
-MAXCACHEAGEHOURS = 23   #Age to expire cache files.
+MAXCACHEAGEHOURS = 2   #Age to expire cache files.
 ANALYSISPERIOD = 80     #Number of days to watch price after a check trigger
 TICKERGROUPSIZE = 5    #Number of tickers to fetch in one request
 
@@ -199,11 +205,12 @@ Checks = ["rsi","rsi_w","seq","seq_w","emax1","emax4","emasort", "multi","bets"]
 
 #Import the secrets.py file that can override any of that.
 MyDirectory = os.path.abspath(os.path.dirname( __file__ ))
+
+#secrets file can overwrite anything...
 try: 
-  
-  execfile(MyDirectory+"/secrets.py")
+  exec(open(MyDirectory+"/secrets.py").read())
 except IOError:
-  print("You should set the secrets")
+  print("No secrets file found.")
   exit()
 
 # Data store.
@@ -229,7 +236,7 @@ def printHelp():
   """
   Print out the help page
   """
-  print """
+  print("""
 options:
 -h --help            -> This page
 -l --log X           -> Debug logging level, higher=more verbose
@@ -245,11 +252,11 @@ options:
 -B --bet price/target/stop/days/confidence/startDate -> bet 
 
 Available Checks:
-  """
-  print "NAME\tALERTS WHEN"
-  print "----\t-----------"
+  """)
+  print("NAME\tALERTS WHEN")
+  print("----\t-----------")
   for k in sorted(AllChecks):
-    print "%s\t%s %s" % (k,AllChecks[k],"[default]" if k in Checks else "")
+    print("%s\t%s %s" % (k,AllChecks[k],"[default]" if k in Checks else ""))
 
 
 
@@ -346,8 +353,8 @@ def getTickerGroup(ticker,groupSize):
     testticker = tickersTmp[n]
     if(testticker==ticker):
       groupNumber = n/groupSize
-      index = groupNumber*groupSize
-      for i in range(index,min(len(tickersTmp),index+groupSize)):
+      index = int(groupNumber*groupSize)
+      for i in range(index,min(int(len(tickersTmp)),index+int(groupSize))):
         t = tickersTmp[i]
         t = t.replace("..",".");
         if((t.endswith(".O")) or (t.endswith(".N"))):
@@ -386,7 +393,7 @@ def getHtml(url):
   if(url in htmlCache):
     return htmlCache[url]
 
-  fn = "caches/web-"+str(hashlib.sha1(url).hexdigest());
+  fn = "caches/web-" + hashlib.sha1(url.encode('utf-8')).hexdigest()
   page = checkForCachePlain(fn)
 
   if(page==None):
@@ -662,7 +669,7 @@ def appendLatestPriceDataWorldTradingData(ticker,data):
 
   page = getHtml(url)
   jsondat = json.loads(page)
-  print url;
+  print(url);
   if("data" in jsondat):
     for dat in jsondat['data']:
       if(dat['symbol']==ticker):
@@ -903,19 +910,23 @@ def appendLatestPriceDataDexscreener(ticker,data):
   dexJson = json.loads(page)
 
   if(len(dexJson)>0):
-    opn = dexJson['pairs'][0]['priceUsd']
-    vol = dexJson['pairs'][0]['volume']['h24']
-    timestamp = time.time()
-    dt = date.fromtimestamp(timestamp)
-    dtkey = dt.isoformat()
-    
-    data[dtkey] = {
-     'o': opn,
-     'h': opn,
-     'l': opn,
-     'c': opn,
-     'v': vol,
-    }
+    print(url+":"+str(dexJson))
+    if(('pairs' in dexJson) and (dexJson['pairs']!=None)):
+      if(len(dexJson['pairs'])>0):
+          if('priceUsd' in dexJson['pairs'][0]):
+            opn = dexJson['pairs'][0]['priceUsd']
+            vol = dexJson['pairs'][0]['volume']['h24']
+            timestamp = time.time()
+            dt = date.fromtimestamp(timestamp)
+            dtkey = dt.isoformat()
+            
+            data[dtkey] = {
+             'o': opn,
+             'h': opn,
+             'l': opn,
+             'c': opn,
+             'v': vol,
+            }
   return data
 
 
@@ -938,28 +949,29 @@ def getSeries(prices,ohlc="c"):
   weekLen = 1
   lastp = 0
   p = 0
-  for day in sorted(prices):
-    addedWeek=False
-    lastp = p
-    dateSeries.append(day)
-    p = float(prices[day][ohlc])
-    dseries.append(p)
+  if((prices!=None)and(len(prices)>0)):
+      for day in sorted(prices):
+        addedWeek=False
+        lastp = p
+        dateSeries.append(day)
+        p = float(prices[day][ohlc])
+        dseries.append(p)
 
-    #If a stock ceases trading, then get get N/A as 
-    #a date
-    if(day!="N/A"):
-      d = dateutil.parser.isoparse(day)
-      newDay = d.weekday()
-      if(newDay < lastDay):
-        #start of new week, so add the last week to the weekly series
-        addedWeek=True
+        #If a stock ceases trading, then get get N/A as 
+        #a date
+        if(day!="N/A"):
+          d = dateutil.parser.isoparse(day)
+          newDay = d.weekday()
+          if(newDay < lastDay):
+            #start of new week, so add the last week to the weekly series
+            addedWeek=True
+            wseries.append(lastp)
+            if(weekLen<lastDay):
+              weekLen = lastDay+1
+          lastDay = newDay
+
+      if(not addedWeek):
         wseries.append(lastp)
-        if(weekLen<lastDay):
-          weekLen = lastDay+1
-      lastDay = newDay
-
-  if(not addedWeek):
-    wseries.append(lastp)
 
   return dseries, wseries, dateSeries, weekLen
 
@@ -1760,7 +1772,7 @@ def emailAlerts():
     "Daily Stock Summary", 
     body
   )
-  print email_text
+  print(email_text)
 
   if(Send_Email):
     try:
@@ -1771,7 +1783,7 @@ def emailAlerts():
         server.sendmail(MAIL_USER, "pre@dalliance.net",email_text)
         server.close()
     except:
-        print "\n\nWARNING: EMAIL FAILED!\n\n"+str(sys.exc_info())
+        print("\n\nWARNING: EMAIL FAILED!\n\n"+str(sys.exc_info()))
    
 
 
@@ -1873,10 +1885,10 @@ for opt,arg in opts:
 
   #List Checks
   elif(opt == "--list-checks"):
-    print "NAME\tALERTS WHEN"
-    print "----\t-----------"
+    print("NAME\tALERTS WHEN")
+    print("----\t-----------")
     for k in sorted(AllChecks):
-      print "%s\t%s" % (k,AllChecks[k])
+      print("%s\t%s" % (k,AllChecks[k]))
     sys.exit()
 
   #Log Level

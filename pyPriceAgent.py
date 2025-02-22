@@ -399,8 +399,7 @@ def getHtml(url):
   if(page==None):
     page=""
     resource = requests.get(url)
-    for line in resource:
-      page+=line
+    page += resource.content.decode('utf-8', errors='ignore')
     resource.close()
 
     #Save it for cachiness
@@ -874,8 +873,15 @@ def appendLatestPriceDataBinance(ticker,data):
   if(symbol=="GBPUSD"):
     symbol ="GBPBUSD"
   url = u"https://api.binance.com/api/v1/klines?symbol="+symbol+"&interval=1d"
-  page = getHtml(url)
-  binanceJson = json.loads(page)
+  page = getHtml(url).strip()
+  binanceJson=""
+  try:
+      binanceJson = json.loads(page)
+  except Exception as e:
+      print(page)
+      print("Can't load JSON for "+str(ticker)+":"+str(e)+" "+url)
+      exit();
+ 
 
   if(len(binanceJson)>0):
     for dat in binanceJson:

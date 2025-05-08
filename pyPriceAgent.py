@@ -118,7 +118,7 @@ import traceback
 # Constants 
 MAXCACHEAGEHOURS = 2   #Age to expire cache files.
 ANALYSISPERIOD = 80     #Number of days to watch price after a check trigger
-TICKERGROUPSIZE = 5    #Number of tickers to fetch in one request
+TICKERGROUPSIZE = 2    #Number of tickers to fetch in one request
 
 # Options, mostly can be changed at the CLI or over-witten in secrets.py
 OUT_CSV_FILE = "export.csv"
@@ -601,6 +601,7 @@ def appendLatestPriceDataStocks(ticker,data):
     for i in range(0,10):
       if(fetchedOkay==False):
         try:
+          #time.sleep(60)                 #Stupid method to try and avoid rate limits
           fetched = yf.download(
                     tickers = tickerGroupString,
                     period =   "3mo",    # 1d,5d,1mo,3mo,6mo,1y,2y,5y,10y,ytd,max

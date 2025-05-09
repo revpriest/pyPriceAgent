@@ -43,7 +43,7 @@
 #
 # CONFIG:
 # ------
-# You'll want to place a file "secrets.py" in the same
+# You'll want to place a file "my_secrets.py" in the same
 # directly as pyPriceAgent.py, to hold API keys and
 # SMTP details etc. There's an example one with dummy
 # data at secrets_example.py
@@ -66,9 +66,9 @@
 #
 # By default we write files to ".new" and then rename them to
 # overwrite the old version. This may not work on Windows, I'm
-# told. You can override the behaviour with secrets.py 
+# told. You can override the behaviour with my_secrets.py 
 #
-# You'll  want to create a secrets.py file to contain API keys
+# You'll  want to create a my_secrets.py file to contain API keys
 # and SMTP email details etc.
 #
 # Run --help to see the CLI params, 
@@ -118,7 +118,7 @@ MAXCACHEAGEHOURS = 2   #Age to expire cache files.
 ANALYSISPERIOD = 80     #Number of days to watch price after a check trigger
 TICKERGROUPSIZE = 2    #Number of tickers to fetch in one request
 
-# Options, mostly can be changed at the CLI or over-witten in secrets.py
+# Options, mostly can be changed at the CLI or over-witten in my_secrets.py
 OUT_CSV_FILE = "export.csv"
 OUT_HTML_FILE = "export.html"
 MAIL_USER = 'xxxxxxxxx@gmail.com'
@@ -197,18 +197,18 @@ AllChecks = {
   "ctrl"   : "fire randomly, as a control check",
 }
 
-#Default enabled checks (override in secrets.py if you want)
+#Default enabled checks (override in my_secrets.py if you want)
 Checks = ["rsi","rsi_w","seq","seq_w","emax1","emax4","emasort", "multi","bets"]
 
 
-#Import the secrets.py file that can override any of that.
+#Import the my_secrets.py file that can override any of that.
 MyDirectory = os.path.abspath(os.path.dirname( __file__ ))
 
 #secrets file can overwrite anything...
 try: 
-  exec(open(MyDirectory+"/secrets.py").read())
+  exec(open(MyDirectory+"/my_secrets.py").read())
 except IOError:
-  print("No secrets file found.")
+  print("No my_secrets.py file found.")
   exit()
 
 # Data store.

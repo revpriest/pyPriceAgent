@@ -1,4 +1,5 @@
 secrets.py
+my_secrets.py
 bets.json
 caches/*
 history/*

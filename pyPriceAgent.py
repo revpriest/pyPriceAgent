@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 
 ##############################################################
 #
@@ -36,11 +36,9 @@
 # WARNING: IT may take a VERY long time to build Pandas.
 # Like, maybe half an hour to an hour on a Pi?
 #
-# sudo pip install tabulate                 #Display results in tables
-# sudo pip install pandas numpy             #moving averages, maths on series.
-# sudo apt install python-matplotlib        #plotting graphs
+# sudo apt install python3-tabulate python3-pandas python3-numpy python3-matplotlib
 # sudo apt install libatlas-base-dev        #Numpy needs this
-# pip3 install yfinance==0.2.54             #Yfinance versions older than this don't work
+# pip3 install yfinance                     #Yfinance versions older than this don't work
 # 
 #
 # CONFIG:
